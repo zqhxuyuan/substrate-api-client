@@ -98,6 +98,7 @@ impl TryFrom<Metadata> for EventsDecoder {
         decoder.register_type_size::<crate::BlockNumber>("BlockNumber")?;
         decoder.register_type_size::<crate::Moment>("Moment")?;
         decoder.register_type_size::<crate::Hash>("Hash")?;
+        decoder.register_type_size::<crate::Hash>("ShardIdentifier")?;
         decoder.register_type_size::<crate::Balance>("Balance")?;
         // VoteThreshold enum index
         decoder.register_type_size::<u8>("VoteThreshold")?;
