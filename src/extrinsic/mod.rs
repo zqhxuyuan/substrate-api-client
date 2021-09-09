@@ -229,12 +229,6 @@ macro_rules! compose_extrinsic {
             info!("Composing generic extrinsic for module {:?} and call {:?}", $module, $call);
             let call = $crate::compose_call!($api.metadata.clone(), $module, $call $(, ($args)) *);
 
-            // let ([_, _], account_id, ..) = call.clone();
-            // let ([k1, k2], ..) = call.clone();
-            // let ([k1, k2]) = call.clone();
-
-            // use the first argument as additional extension?
-
             if let Some(signer) = $api.signer.clone() {
                 $crate::compose_extrinsic_offline_account!(
                     signer,

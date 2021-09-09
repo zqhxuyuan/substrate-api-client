@@ -35,7 +35,8 @@ fn main() {
     let origin = signer.to_account_id();
     println!("account:{:?}", origin);
 
-    let xt = api.do_something(1);
+    // let xt = api.do_something(1);
+    let xt = api.do_something1(Some(1));
     // let xt = api.do_something0();
     println!("[+] Composed extrinsic: {:?}\n", xt);
 
