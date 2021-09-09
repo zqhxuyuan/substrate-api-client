@@ -35,7 +35,12 @@ fn main() {
     let api = Api::new(client).map(|api| api.set_signer(sudoer)).unwrap();
 
     // set the recipient of newly issued funds
-    let to = AccountKeyring::Bob.to_account_id();
+    let to = AccountKeyring::Charlie.to_account_id();
+
+    match api.get_account_data(&to).unwrap() {
+        Some(bob) => println!("[+] Free Balance is is {}\n", bob.free),
+        None => println!("[+] Free Balance is is 0\n"),
+    }
 
     // this call can only be called by sudo
     #[allow(clippy::redundant_clone)]
@@ -43,9 +48,9 @@ fn main() {
         api.metadata.clone(),
         "Balances",
         "set_balance",
-        GenericAddress::Id(to),
-        Compact(42_u128),
-        Compact(42_u128)
+        GenericAddress::Id(to.clone()),
+        Compact(1000000000000_u128),
+        Compact(1000000000000_u128)
     );
     #[allow(clippy::redundant_clone)]
     let xt: UncheckedExtrinsicV4<_> = compose_extrinsic!(api.clone(), "Sudo", "sudo", call);
@@ -55,6 +60,11 @@ fn main() {
         .send_extrinsic(xt.hex_encode(), XtStatus::InBlock)
         .unwrap();
     println!("[+] Transaction got included. Hash: {:?}", tx_hash);
+
+    match api.get_account_data(&to).unwrap() {
+        Some(bob) => println!("[+] Free Balance is is {}\n", bob.free),
+        None => println!("[+] Free Balance is is 0\n"),
+    }
 }
 
 pub fn get_node_url_from_cli() -> String {
@@ -62,7 +72,7 @@ pub fn get_node_url_from_cli() -> String {
     let matches = App::from_yaml(yml).get_matches();
 
     let node_ip = matches.value_of("node-server").unwrap_or("ws://127.0.0.1");
-    let node_port = matches.value_of("node-port").unwrap_or("9944");
+    let node_port = matches.value_of("node-port").unwrap_or("9990");
     let url = format!("{}:{}", node_ip, node_port);
     println!("Interacting with node on {}\n", url);
     url

@@ -15,36 +15,58 @@
 
 ///! Very simple example that shows how to use a predefined extrinsic from the extrinsic module
 use clap::{load_yaml, App};
-use keyring::AccountKeyring;
+use keyring::Ed25519Keyring;
 use sp_core::crypto::Pair;
-use sp_runtime::MultiAddress;
+use sp_runtime::{MultiAddress, MultiSigner};
 
 use substrate_api_client::rpc::WsRpcClient;
 use substrate_api_client::{Api, XtStatus};
+use sp_core::{ecdsa2, Public};
+use sp_runtime::traits::IdentifyAccount;
+
+pub fn get_from_seed_pair<TPublic: Public>(seed: &str) -> TPublic::Pair {
+    TPublic::Pair::from_string(&format!("//{}", seed), None)
+        .expect("static values are valid; qed")
+}
 
 fn main() {
     env_logger::init();
     let url = get_node_url_from_cli();
 
     // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from = AccountKeyring::Alice.pair();
+    // let from = Ed25519Keyring::Alice.pair();
+    // let to = Ed25519Keyring::Bob.to_account_id();
+
+    // from: alice
+    let from = get_from_seed_pair::<ecdsa2::Public2>("Alice");
+    let public_key = from.public();
+    let account: MultiSigner = public_key.into();
+    let alice = account.into_account();
+    println!("alice:{:?}", alice);
+
+    // to: bob
+    let bob_pair = get_from_seed_pair::<ecdsa2::Public2>("Bob");
+    let public_key = bob_pair.public();
+    let account: MultiSigner = public_key.into();
+    let to = account.into_account();
+    println!("bob:{:?}", to);
+
     let client = WsRpcClient::new(&url);
     let api = Api::new(client)
         .map(|api| api.set_signer(from.clone()))
         .unwrap();
 
-    let to = AccountKeyring::Bob.to_account_id();
-    let char = AccountKeyring::Charlie.to_account_id();
-
+    // 查询Alice/Bob的账户余额
+    match api.get_account_data(&alice).unwrap() {
+        Some(alice) => println!("[+] Alice's Free Balance is is {}", alice.free),
+        None => println!("[+] Alice's Free Balance is is 0"),
+    }
     match api.get_account_data(&to).unwrap() {
-        Some(bob) => println!("[+] Bob's Free Balance is is {}\n", bob.free),
-        None => println!("[+] Bob's Free Balance is is 0\n"),
+        Some(bob) => println!("[+] Bob's Free Balance is is {}", bob.free),
+        None => println!("[+] Bob's Free Balance is is 0"),
     }
-    match api.get_account_data(&char).unwrap() {
-        Some(bob) => println!("[+] Char's Free Balance is is {}\n", bob.free),
-        None => println!("[+] Char's Free Balance is is 0\n"),
-    }
-    // generate extrinsic
+
+    // 生成转账的交易
     let xt = api.balance_transfer(MultiAddress::Id(to.clone()), 1000);
 
     println!(
@@ -52,7 +74,6 @@ fn main() {
         from.public(),
         to
     );
-
     println!("[+] Composed extrinsic: {:?}\n", xt);
 
     // send and watch extrinsic until finalized
@@ -62,23 +83,10 @@ fn main() {
     println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
 
     // verify that Bob's free Balance increased
+    let alice = api.get_account_data(&alice).unwrap().unwrap();
+    println!("[+] Alice's Free Balance is now {}", alice.free);
     let bob = api.get_account_data(&to).unwrap().unwrap();
-    println!("[+] Bob's Free Balance is now {}\n", bob.free);
-
-    // set balance not work, because without sudo
-
-    // let xt = api.balance_set_balance(MultiAddress::Id(char.clone()), 1000000, 100000);
-    // println!("[+] Composed extrinsic: {:?}\n", xt);
-    // let tx_hash = api
-    //     .send_extrinsic(xt.hex_encode(), XtStatus::InBlock)
-    //     .unwrap();
-    // println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
-    // // let charlie = api.get_account_data(&char).unwrap().unwrap();
-    // // println!("[+] Charlie's Free Balance is now {}, Reserve:{}\n", charlie.free, charlie.fee_frozen);
-    // match api.get_account_data(&char).unwrap() {
-    //     Some(bob) => println!("[+] Char's Free Balance is is {}\n", bob.free),
-    //     None => println!("[+] Char's Free Balance is is 0\n"),
-    // }
+    println!("[+] Bob's Free Balance is now {}", bob.free);
 }
 
 pub fn get_node_url_from_cli() -> String {

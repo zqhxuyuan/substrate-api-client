@@ -9,10 +9,10 @@ substrate-api-client = { path = "../.." }
 codec = { package = "parity-scale-codec", features = ["derive"], version = "2.0.0" }
 
 [dependencies.sp-core]
-git = "https://github.com/paritytech/substrate.git"
-branch = "master"
+git = "https://github.com/patractlabs/substrate.git"
+branch = "vertic/mvp0"
 
 [dependencies.keyring]
-git = "https://github.com/paritytech/substrate.git"
-branch = "master"
+git = "https://github.com/patractlabs/substrate.git"
+branch = "vertic/mvp0"
 package = "sp-keyring"

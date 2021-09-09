@@ -20,8 +20,8 @@ path = ".."
 default-features=false
 
 [dependencies.sp-io]
-git = "https://github.com/paritytech/substrate.git"
-branch = "master"
+git = "https://github.com/patractlabs/substrate.git"
+branch = "vertic/mvp0"
 default-features=false
 features = ["disable_oom", "disable_panic_handler"]
 

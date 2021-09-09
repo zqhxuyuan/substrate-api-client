@@ -46,7 +46,7 @@ use substrate_api_client::{Api, node_metadata};
 
 fn main() {
     // instantiate an Api that connects to the given address
-    let url = "127.0.0.1:9944";
+    let url = "127.0.0.1:9990";
     // if no signer is set in the whole program, we need to give to Api a specific type instead of an associated type
     // as during compilation the type needs to be defined.
     let api = Api::<sr25519::Pair>::new(format!("ws://{}", url));

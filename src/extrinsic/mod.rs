@@ -24,6 +24,8 @@ pub extern crate codec;
 pub extern crate log;
 
 #[cfg(feature = "std")]
+pub mod template;
+#[cfg(feature = "std")]
 pub mod balances;
 #[cfg(feature = "std")]
 pub mod contract;
@@ -76,6 +78,7 @@ macro_rules! compose_extrinsic_offline {
         use $crate::extrinsic::xt_primitives::*;
         use $crate::sp_runtime::generic::Era;
         use $crate::sp_runtime::traits::IdentifyAccount;
+        use $crate::sp_runtime::traits::{BlakeTwo256, Hash};
         use $crate::sp_runtime::MultiSigner;
 
         let extra = GenericExtra::new($era, $nonce);
@@ -93,7 +96,11 @@ macro_rules! compose_extrinsic_offline {
             ),
         );
 
-        let signature = raw_payload.using_encoded(|payload| $signer.sign(payload));
+        let signature = raw_payload.using_encoded(|payload| {
+            // println!("payload:{}", hex::encode(payload));
+            println!("payload:{:?}", BlakeTwo256::hash_of(&payload).as_fixed_bytes());
+            $signer.sign(payload)
+        });
 
         let multi_signer: MultiSigner = $signer.public().into();
 

@@ -13,46 +13,45 @@
     limitations under the License.
 */
 
-//! This examples shows how to use the compose_extrinsic macro to create an extrinsic for any (custom)
-//! module, whereas the desired module and call are supplied as a string.
-
+///! Very simple example that shows how to use a predefined extrinsic from the extrinsic module
 use clap::{load_yaml, App};
-use keyring::AccountKeyring;
+use keyring::Ed25519Keyring;
 use sp_core::crypto::Pair;
+use sp_runtime::MultiAddress;
 
 use substrate_api_client::rpc::WsRpcClient;
-use substrate_api_client::{compose_extrinsic, Api, UncheckedExtrinsicV4, XtStatus};
+use substrate_api_client::{Api, XtStatus};
 
 fn main() {
     env_logger::init();
     let url = get_node_url_from_cli();
-
-    // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from = AccountKeyring::Alice.pair();
     let client = WsRpcClient::new(&url);
-    let api = Api::new(client).map(|api| api.set_signer(from)).unwrap();
 
-    // set the recipient
-    let to = AccountKeyring::Bob.to_account_id();
+    let mut api = Api::new(client).unwrap();
+    let signer = Ed25519Keyring::Alice;
+    api.signer = Some(signer.pair());
+    println!("[+] Alice's Account Nonce is {}", api.get_nonce().unwrap());
 
-    // call Balances::transfer
-    // the names are given as strings
-    #[allow(clippy::redundant_clone)]
-    let xt: UncheckedExtrinsicV4<_> = compose_extrinsic!(
-        api.clone(),
-        "Balances",
-        "transfer",
-        GenericAddress::Id(to),
-        Compact(42_u128)
-    );
+    let origin = signer.to_account_id();
+    println!("account:{:?}", origin);
 
-    println!("[+] Composed Extrinsic:\n {:?}\n", xt);
+    // let xt = api.do_something(MultiAddress::Id(origin.clone()), 1);
+    let xt = api.do_something0(MultiAddress::Id(origin.clone()));
+    println!("[+] Composed extrinsic: {:?}\n", xt);
 
-    // send and watch extrinsic until InBlock
+    // send and watch extrinsic until finalized
     let tx_hash = api
         .send_extrinsic(xt.hex_encode(), XtStatus::InBlock)
         .unwrap();
-    println!("[+] Transaction got included. Hash: {:?}", tx_hash);
+    println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
+
+    // get StorageValue
+    let result: u32 = api
+        .get_storage_value("TemplateModule", "Something", None)
+        .unwrap()
+        .or(Some(99))
+        .unwrap();
+    println!("[+] some value is {:?}", result);
 }
 
 pub fn get_node_url_from_cli() -> String {
