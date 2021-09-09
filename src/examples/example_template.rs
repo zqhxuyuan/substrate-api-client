@@ -53,8 +53,8 @@ fn main() {
     //    // parameters
     //    MultiAddress::Id(d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)),
     //    1000))
-    // let xt = api.do_something(MultiAddress::Id(origin.clone()), 1);
-    let xt = api.do_something0(MultiAddress::Id(origin.clone()));
+    let xt = api.do_something(1);
+    // let xt = api.do_something0();
     println!("[+] Composed extrinsic: {:?}\n", xt);
 
     // send and watch extrinsic until finalized

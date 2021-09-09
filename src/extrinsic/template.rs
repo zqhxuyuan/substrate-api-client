@@ -12,8 +12,8 @@ pub const Template: &str = "TemplateModule";
 pub const DoSomething: &str = "do_something";
 pub const DoSomething0: &str = "do_something0";
 
-pub type TemplateFn = (CallIndex, GenericAddress, u32);
-pub type TemplateFn0 = (CallIndex, GenericAddress);
+pub type TemplateFn = (CallIndex, u32);
+pub type TemplateFn0 = (CallIndex);
 
 pub type TemplateXt = UncheckedExtrinsicV4<TemplateFn>;
 pub type TemplateXt0 = UncheckedExtrinsicV4<TemplateFn0>;
@@ -26,22 +26,20 @@ where
     MultiSigner: From<P::Public>,
     Client: RpcClient,
 {
-    pub fn do_something(&self, to: GenericAddress, amount: u32) -> TemplateXt {
+    pub fn do_something(&self, amount: u32) -> TemplateXt {
         compose_extrinsic!(
             self,
             Template,
             DoSomething,
-            to,
             amount
         )
     }
 
-    pub fn do_something0(&self, to: GenericAddress) -> TemplateXt0 {
+    pub fn do_something0(&self) -> TemplateXt0 {
         compose_extrinsic!(
             self,
             Template,
-            DoSomething0,
-            to
+            DoSomething0
         )
     }
 }

@@ -98,7 +98,7 @@ macro_rules! compose_extrinsic_offline {
 
         let signature = raw_payload.using_encoded(|payload| {
             // println!("payload:{}", hex::encode(payload));
-            println!("payload:{:?}", BlakeTwo256::hash_of(&payload).as_fixed_bytes());
+            // println!("payload:{:?}", BlakeTwo256::hash_of(&payload).as_fixed_bytes());
             $signer.sign(payload)
         });
 
