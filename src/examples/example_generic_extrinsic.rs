@@ -42,6 +42,7 @@ fn main() {
         api.clone(),
         "Balances",
         "transfer",
+        None,
         GenericAddress::Id(to),
         Compact(42_u128)
     );

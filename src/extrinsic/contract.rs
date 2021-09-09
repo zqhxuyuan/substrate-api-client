@@ -65,6 +65,7 @@ where
             &self,
             CONTRACTS_MODULE,
             CONTRACTS_PUT_CODE,
+            None,
             Compact(gas_limit),
             code
         )
@@ -81,6 +82,7 @@ where
             self,
             CONTRACTS_MODULE,
             CONTRACTS_INSTANTIATE,
+            None,
             Compact(endowment),
             Compact(gas_limit),
             code_hash,
@@ -99,6 +101,7 @@ where
             self,
             CONTRACTS_MODULE,
             CONTRACTS_CALL,
+            None,
             dest,
             Compact(value),
             Compact(gas_limit),

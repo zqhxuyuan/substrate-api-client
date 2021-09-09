@@ -6,17 +6,20 @@ use crate::{
     std::{Api, RpcClient},
 };
 use sp_core::crypto::Pair;
-use sp_runtime::{MultiSignature, MultiSigner};
+use sp_runtime::{MultiSignature, MultiSigner, AccountId32};
 
 pub const Template: &str = "TemplateModule";
 pub const DoSomething: &str = "do_something";
 pub const DoSomething0: &str = "do_something0";
+pub const DoSomething1: &str = "do_something1";
 
 pub type TemplateFn = (CallIndex, u32);
 pub type TemplateFn0 = (CallIndex);
+pub type TemplateFn1 = (CallIndex);
 
 pub type TemplateXt = UncheckedExtrinsicV4<TemplateFn>;
 pub type TemplateXt0 = UncheckedExtrinsicV4<TemplateFn0>;
+pub type TemplateXt1 = UncheckedExtrinsicV4<TemplateFn1>;
 
 #[cfg(feature = "std")]
 impl<P, Client> Api<P, Client>
@@ -31,6 +34,7 @@ where
             self,
             Template,
             DoSomething,
+            None,
             amount
         )
     }
@@ -39,7 +43,17 @@ where
         compose_extrinsic!(
             self,
             Template,
-            DoSomething0
+            DoSomething0,
+            None
+        )
+    }
+
+    pub fn do_something1(&self, accountId: Option<u32>) -> TemplateXt1 {
+        compose_extrinsic!(
+            self,
+            Template,
+            DoSomething1,
+            accountId
         )
     }
 }

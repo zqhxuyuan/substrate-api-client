@@ -79,6 +79,10 @@ name = "example_template"
 path = "src/examples/example_template.rs"
 
 [[example]]
+name = "example_test"
+path = "src/examples/example_test.rs"
+
+[[example]]
 name = "example_template_ed25519"
 path = "src/examples/example_template_ed25519.rs"
 
