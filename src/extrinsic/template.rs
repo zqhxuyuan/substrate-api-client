@@ -2,7 +2,7 @@ use super::xt_primitives::*;
 use crate::extrinsic::CallIndex;
 #[cfg(feature = "std")]
 use crate::{
-    compose_extrinsic,
+    compose_extrinsic, compose_extrinsic_account,
     std::{Api, RpcClient},
 };
 use sp_core::crypto::Pair;
@@ -34,7 +34,6 @@ where
             self,
             Template,
             DoSomething,
-            None,
             amount
         )
     }
@@ -43,13 +42,12 @@ where
         compose_extrinsic!(
             self,
             Template,
-            DoSomething0,
-            None
+            DoSomething0
         )
     }
 
-    pub fn do_something1(&self, accountId: Option<u32>) -> TemplateXt1 {
-        compose_extrinsic!(
+    pub fn do_something1(&self, accountId: u32) -> TemplateXt1 {
+        compose_extrinsic_account!(
             self,
             Template,
             DoSomething1,

@@ -60,7 +60,7 @@ where
             self,
             STAKING_MODULE,
             STAKING_BOND,
-            None,
+            // None,
             controller,
             Compact(value),
             payee
@@ -69,19 +69,19 @@ where
 
     /// Bonds extra funds from the stash's free balance to the balance for staking.
     pub fn staking_bond_extra(&self, value: Balance) -> StakingBondExtraXt {
-        compose_extrinsic!(self, STAKING_MODULE, STAKING_BOND_EXTRA, None, Compact(value))
+        compose_extrinsic!(self, STAKING_MODULE, STAKING_BOND_EXTRA, Compact(value))
     }
 
     /// Unbond `value` portion of the stash.
     /// If `value` is less than the minimum required, then the entire amount is unbound.
     /// Must be signed by the controller of the stash.
     pub fn staking_unbond(&self, value: Balance) -> StakingUnbondXt {
-        compose_extrinsic!(self, STAKING_MODULE, STAKING_UNBOND, None, Compact(value))
+        compose_extrinsic!(self, STAKING_MODULE, STAKING_UNBOND, Compact(value))
     }
 
     /// Rebond `value` portion of the current amount that is in the process of unbonding.
     pub fn staking_rebond(&self, value: Balance) -> StakingRebondXt {
-        compose_extrinsic!(self, STAKING_MODULE, STAKING_REBOND, None, Compact(value))
+        compose_extrinsic!(self, STAKING_MODULE, STAKING_REBOND, Compact(value))
     }
 
     /// Free the balance of the stash so the stash account can do whatever it wants.
@@ -92,7 +92,7 @@ where
             self,
             STAKING_MODULE,
             STAKING_WITHDRAW_UNBONDED,
-            None,
+            // None,
             num_slashing_spans
         )
     }
@@ -100,7 +100,7 @@ where
     /// Nominate `targets` as validators.
     /// Must be signed by the controller of the stash and called when EraElectionStatus is Closed.
     pub fn staking_nominate(&self, targets: Vec<GenericAddress>) -> StakingNominateXt {
-        compose_extrinsic!(self, STAKING_MODULE, STAKING_NOMINATE, None, targets)
+        compose_extrinsic!(self, STAKING_MODULE, STAKING_NOMINATE, targets)
     }
 
     /// Stop nominating por validating. Effects take place in the next era
@@ -112,6 +112,6 @@ where
     /// Effects will be felt at the beginning of the next era.
     /// Must be Signed by the stash, not the controller.
     pub fn staking_set_controller(&self, controller: GenericAddress) -> StakingSetControllerXt {
-        compose_extrinsic!(self, STAKING_MODULE, STAKING_SET_CONTROLLER, None, controller)
+        compose_extrinsic!(self, STAKING_MODULE, STAKING_SET_CONTROLLER, controller)
     }
 }

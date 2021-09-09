@@ -39,13 +39,13 @@ pub type GenericAddress = sp_runtime::MultiAddress<AccountId, ()>;
 /// therefore omitted here.
 #[cfg_attr(feature = "std", derive(Debug))]
 #[derive(Decode, Encode, Clone, Eq, PartialEq)]
-pub struct GenericExtra(Era, Compact<u32>, Compact<u128>, Option<u32>);
+pub struct GenericExtra(Era, Compact<u32>, Compact<u128>, u32);
 
 impl GenericExtra {
     pub fn new(era: Era, nonce: u32) -> GenericExtra {
-        GenericExtra(era, Compact(nonce), Compact(0_u128), None)
+        GenericExtra(era, Compact(nonce), Compact(0_u128), 0_u32)
     }
-    pub fn new_account(era: Era, nonce: u32, account: Option<u32>) -> GenericExtra {
+    pub fn new_account(era: Era, nonce: u32, account: u32) -> GenericExtra {
         GenericExtra(era, Compact(nonce), Compact(0_u128), account)
     }
 }
@@ -58,7 +58,7 @@ impl Default for GenericExtra {
 
 /// additionalSigned fields of the respective SignedExtra fields.
 /// Order is the same as declared in the extra.
-pub type AdditionalSigned = (u32, u32, H256, H256, (), (), (), Option<u32>);
+pub type AdditionalSigned = (u32, u32, H256, H256, (), (), (), u32);
 
 #[derive(Encode, Clone)]
 pub struct SignedPayload<Call>((Call, GenericExtra, AdditionalSigned));
