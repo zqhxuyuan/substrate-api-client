@@ -94,7 +94,7 @@ macro_rules! compose_extrinsic_offline {
                 (),
                 (),
                 (),
-                0_u32
+                [0u8; 32]
             ),
         );
 

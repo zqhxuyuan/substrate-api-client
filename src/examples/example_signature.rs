@@ -18,7 +18,7 @@ use clap::{load_yaml, App};
 use keyring::AccountKeyring;
 use keyring::Ed25519Keyring;
 use sp_core::crypto::Pair;
-use sp_runtime::{MultiAddress, MultiSigner};
+use sp_runtime::{MultiAddress, MultiSigner, AccountId32};
 use sp_core::{ecdsa, Public, sr25519, ed25519, ecdsa2};
 
 use substrate_api_client::rpc::WsRpcClient;
@@ -37,25 +37,91 @@ fn main() {
     let alice3: MultiSigner = get_from_seed_pair::<ecdsa::Public>("Alice").public().into();
     let alice4: MultiSigner = get_from_seed_pair::<ecdsa2::Public2>("Alice").public().into();
 
-    // 4afa5b7b13cabc96fe93321322c39f0c6e15cd15145c0decb2968c7bae0b0ae8 (5Dm1mkFh...)
-    // let secret_key = hex::decode(
-    //     "01e552298e47454041ea31273b4b630c64c104e4514aa3643490b8aaca9cf8ed").unwrap();
-    // let alice = ecdsa::Pair::from_seed_slice(&secret_key).unwrap();
-    // let alice = alice.public().into();
-    // print_info(alice)
+    // AccountId32 的打印：
+    //  crate::hexdisplay::HexDisplay::from(&self.0)  -- 对 [u8;32] 的 hex 格式
+    //  self.to_ss58check()[0..8]                     -- KW39r9CJ...
+    // 注意：虽然下面的 ed25519/sr25519 两种情况下 public key 和 account 打印的值一样，
+    // 但并不代表 public key 等于 account，前者 public key 是 Public 类型，后者是 AccountId32 类型
+    // 从密码学上而言，public key 可以推导出 account, 即 address, 通常用 ss58 格式
+    // 由于 public key 和 account 的打印 Debug 实现，都是调用 to_ss58check_with_version
+    // 即打印的是 ss58 格式的地址，所以显示上，public key 和 account 的地址值都一样
 
+    // ecdsa2 的 public key 有 66 char = 33 bytes, account 有 64 char =  32 bytes
+    //  pubkey:020a1091341fe5664bfa1782d5e04779689068c916b04cb365ec3153755684d9a1 (KW39r9CJ...)
+    //  prikey:"cb6df9de1efca7a3998a8ead4e02159d5fa99c3e0d4fd6432667390bb4726854"
+    //  account:80280ca34c7ad2f3e1642606e04cc55ebee1cbce552f250e85c57b70b2e2625b (5ExjtCWm...)
+
+    // ecdsa 的 public key 和 ecdsa2 的 public key 一样，但是 account 不一样
+    //  pubkey:020a1091341fe5664bfa1782d5e04779689068c916b04cb365ec3153755684d9a1 (KW39r9CJ...)
+    //  prikey:"cb6df9de1efca7a3998a8ead4e02159d5fa99c3e0d4fd6432667390bb4726854"
+    //  account:01e552298e47454041ea31273b4b630c64c104e4514aa3643490b8aaca9cf8ed (5C7C2Z5s...)
+
+    // ed25519 的 public key 和 account 都是 64 char, 32 bytes，并且 public key = account??
+    //  pubkey:88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee (5FA9nQDV...)
+    //  prikey:"abf8e5bdbe30c65656c0a3cbd181ff8a56294a69dfedd27982aace4a76909115"
+    //  account:88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee (5FA9nQDV...)
+
+    // sr25519
+    //  pubkey:d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
+    //  account:d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
+    println!("ecdsa2");
     let from = get_from_seed_pair::<ecdsa2::Public2>("Alice");
     let public_key = from.public();
     let private_key = from.seed();
-    println!("pubkey:{:?}", public_key);
-    println!("prikey:{:?}", hex::encode(private_key));
+    println!(" pubkey:{:?}", public_key);
+    println!(" prikey:{:?}", hex::encode(private_key));
     let account: MultiSigner = public_key.into();
     let alice = account.into_account();
-    println!("account:{:?}", alice);
+    println!(" account:{:?}", alice);
+    // let alice = ecdsa2::Pair2::from_seed_slice(&private_key).unwrap();
+    // let alice = alice.public().into();
+    // print_info(alice)
 
-    let alice = ecdsa2::Pair2::from_seed_slice(&private_key).unwrap();
-    let alice = alice.public().into();
-    print_info(alice)
+    println!("ecdsa");
+    let from = get_from_seed_pair::<ecdsa::Public>("Alice");
+    let public_key = from.public();
+    let private_key = from.seed();
+    println!(" pubkey:{:?}", public_key);
+    println!(" prikey:{:?}", hex::encode(private_key));
+    let account: MultiSigner = public_key.into();
+    let alice = account.into_account();
+    println!(" account:{:?}", alice);
+
+    println!("ed25519");
+    let from = get_from_seed_pair::<ed25519::Public>("Alice");
+    let public_key = from.public();
+    let private_key = from.seed();
+    println!(" pubkey:{:?}", public_key);
+    println!(" prikey:{:?}", hex::encode(private_key));
+    let account: MultiSigner = public_key.into();
+    let alice = account.into_account();
+    println!(" account:{:?}", alice);
+
+    println!("sr25519");
+    let from = get_from_seed_pair::<sr25519::Public>("Alice");
+    let public_key = from.public();
+    // let private_key = from.seed();
+    println!(" pubkey:{:?}", public_key);
+    // println!(" prikey:{:?}", hex::encode(private_key));
+    let account: MultiSigner = public_key.into();
+    let alice = account.into_account();
+    println!(" account:{:?}", alice);
+
+    println!("--------------------");
+    generate_mock_account_name_address();
+}
+
+// idx:0, 5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM
+// idx:1, 5C62Ck4UrFPiBtoCmeSrgF7x9yv9mn38446dhCpsi2mLHiFT
+// idx:2, 5C7LYpP2ZH3tpKbvVvwiVe54AapxErdPBbvkYhe6y9ZBkqWt
+// idx:3, 5C8etthaGJi5SkQeEDSaK32ABBjkhwDeK9ksQCTLEGM3EH14
+// idx:4, 5C9yEy27yLNG5BDMxVwS8RyGBneZB1ouShazFhGZVP8thK5z
+pub fn generate_mock_account_name_address() {
+    for idx in 0..5u8 {
+        let arr = [idx; 32];
+        let account: AccountId32 = arr.into();
+        println!("idx:{}, {}", idx, account);
+    }
 }
 
 pub fn generate_eth_account_32() {

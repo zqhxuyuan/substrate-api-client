@@ -15,7 +15,7 @@
 
 ///! Very simple example that shows how to use a predefined extrinsic from the extrinsic module
 use clap::{load_yaml, App};
-use keyring::Ed25519Keyring;
+use keyring::AccountKeyring;
 use sp_core::crypto::Pair;
 use sp_runtime::MultiAddress;
 
@@ -27,16 +27,33 @@ fn main() {
     let url = get_node_url_from_cli();
     let client = WsRpcClient::new(&url);
 
+    // initialize api and set the signer (sender) that is used to sign the extrinsics
+    // let from = AccountKeyring::Alice.pair();
+    // let api = Api::new(client)
+    //     .map(|api| api.set_signer(from.clone()))
+    //     .unwrap();
     let mut api = Api::new(client).unwrap();
-    let signer = Ed25519Keyring::Alice;
+    let signer = AccountKeyring::Alice;
     api.signer = Some(signer.pair());
     println!("[+] Alice's Account Nonce is {}", api.get_nonce().unwrap());
 
+    // 2021-09-09 14:34:31 account: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY,
+    //   d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
+    // account:d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
     let origin = signer.to_account_id();
     println!("account:{:?}", origin);
 
-    // let xt = api.do_something(1);
-    let xt = api.do_something1([1u8; 32], 100);
+    // [+] Composed extrinsic: UncheckedExtrinsic(
+    //   Some(
+    //     (MultiAddress::Id(d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d),
+    //     GenericExtra(Era::Immortal, 2, 0)
+    //   )
+    // ),
+    // ([9, 0],  // module and function index
+    //    // parameters
+    //    MultiAddress::Id(d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)),
+    //    1000))
+    let xt = api.do_something(1);
     // let xt = api.do_something0();
     println!("[+] Composed extrinsic: {:?}\n", xt);
 

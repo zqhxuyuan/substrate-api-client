@@ -28,7 +28,7 @@ support = { version = "4.0.0-dev", default-features = false, git = "https://gith
 sp-std = { version = "4.0.0-dev", default-features = false, git = "https://github.com/patractlabs/substrate.git", branch = "vertic/mvp0" }
 # need to add this for the app_crypto macro
 sp-application-crypto = { version = "4.0.0-dev", default-features = false, git = "https://github.com/patractlabs/substrate.git", branch = "vertic/mvp0", features = ["full_crypto"] }
-
+accounts = { version = "4.0.0-dev", git = "https://github.com/patractlabs/substrate.git", branch = "vertic/mvp0", package = "module-accounts", optional = true }
 
 [dev-dependencies]
 env_logger = "0.9"
@@ -57,7 +57,8 @@ std = [
 	"primitive-types",
 	"thiserror",
 	"sp-rpc",
-	"transaction-payment/std"
+	"transaction-payment/std",
+	"accounts/std",
 ]
 ws-client = ["ws"]
 staking-xt = ["std", "staking"]
@@ -77,6 +78,10 @@ path = "src/examples/example_signature.rs"
 [[example]]
 name = "example_template"
 path = "src/examples/example_template.rs"
+
+[[example]]
+name = "example_account"
+path = "src/examples/example_account.rs"
 
 [[example]]
 name = "example_test"

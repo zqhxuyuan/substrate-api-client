@@ -15,7 +15,7 @@ pub const DoSomething1: &str = "do_something1";
 
 pub type TemplateFn = (CallIndex, u32);
 pub type TemplateFn0 = (CallIndex);
-pub type TemplateFn1 = (CallIndex);
+pub type TemplateFn1 = (CallIndex, u32);
 
 pub type TemplateXt = UncheckedExtrinsicV4<TemplateFn>;
 pub type TemplateXt0 = UncheckedExtrinsicV4<TemplateFn0>;
@@ -46,12 +46,13 @@ where
         )
     }
 
-    pub fn do_something1(&self, accountId: u32) -> TemplateXt1 {
+    pub fn do_something1(&self, accountId: [u8; 32], amount: u32) -> TemplateXt1 {
         compose_extrinsic_account!(
             self,
             Template,
             DoSomething1,
-            accountId
+            accountId,
+            amount
         )
     }
 }
