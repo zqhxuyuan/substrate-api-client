@@ -17,10 +17,11 @@
 use clap::{load_yaml, App};
 use keyring::Ed25519Keyring;
 use sp_core::crypto::Pair;
-use sp_runtime::MultiAddress;
+use sp_runtime::{MultiAddress, MultiSigner};
 
 use substrate_api_client::rpc::WsRpcClient;
-use substrate_api_client::{Api, XtStatus};
+use substrate_api_client::{Api, XtStatus, GenericAddress};
+use sp_runtime::traits::IdentifyAccount;
 
 fn main() {
     env_logger::init();
@@ -35,8 +36,17 @@ fn main() {
     let origin = signer.to_account_id();
     println!("account:{:?}", origin);
 
+    let bob = Ed25519Keyring::Bob;
+    let bob_p = bob.pair();
+
+    // let operator_signer: MultiSigner = bob_p.public().into();
+    // let account_id = operator_signer.into_account();
+    // let address = GenericAddress::from(account_id.clone());
+    // let account_u8: [u8; 32] = account_id.into();
+
     // let xt = api.do_something(1);
-    let xt = api.do_something1([1u8; 32], 100);
+    // let xt = api.do_something1([1u8; 32], 100);
+    let xt = api.do_something1(bob_p, 100);
     // let xt = api.do_something0();
     println!("[+] Composed extrinsic: {:?}\n", xt);
 
@@ -59,8 +69,10 @@ pub fn get_node_url_from_cli() -> String {
     let yml = load_yaml!("../../src/examples/cli.yml");
     let matches = App::from_yaml(yml).get_matches();
 
-    let node_ip = matches.value_of("node-server").unwrap_or("ws://127.0.0.1");
-    let node_port = matches.value_of("node-port").unwrap_or("9990");
+    // let node_ip = matches.value_of("node-server").unwrap_or("ws://127.0.0.1");
+    let node_ip = matches.value_of("node-server").unwrap_or("ws://10.1.1.20");
+    // let node_port = matches.value_of("node-port").unwrap_or("19944");
+    let node_port = matches.value_of("node-port").unwrap_or("19944");
     let url = format!("{}:{}", node_ip, node_port);
     println!("Interacting with node on {}\n", url);
     url

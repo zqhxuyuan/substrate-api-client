@@ -80,6 +80,10 @@ name = "example_template"
 path = "src/examples/example_template.rs"
 
 [[example]]
+name = "example_system"
+path = "src/examples/example_system.rs"
+
+[[example]]
 name = "example_account"
 path = "src/examples/example_account.rs"
 

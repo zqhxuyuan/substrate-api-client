@@ -53,8 +53,14 @@ fn main() {
     //    // parameters
     //    MultiAddress::Id(d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)),
     //    1000))
-    let xt = api.do_something(1);
+    // let xt = api.do_something(1);
     // let xt = api.do_something0();
+    // println!("[+] Composed extrinsic: {:?}\n", xt);
+
+    let bob = AccountKeyring::Bob;
+    let bob_p = bob.pair();
+
+    let xt = api.do_something1(bob_p, 100);
     println!("[+] Composed extrinsic: {:?}\n", xt);
 
     // send and watch extrinsic until finalized
@@ -77,7 +83,7 @@ pub fn get_node_url_from_cli() -> String {
     let matches = App::from_yaml(yml).get_matches();
 
     let node_ip = matches.value_of("node-server").unwrap_or("ws://127.0.0.1");
-    let node_port = matches.value_of("node-port").unwrap_or("9990");
+    let node_port = matches.value_of("node-port").unwrap_or("19944");
     let url = format!("{}:{}", node_ip, node_port);
     println!("Interacting with node on {}\n", url);
     url

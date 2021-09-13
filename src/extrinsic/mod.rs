@@ -28,6 +28,8 @@ pub mod template;
 #[cfg(feature = "std")]
 pub mod balances;
 #[cfg(feature = "std")]
+pub mod system;
+#[cfg(feature = "std")]
 pub mod contract;
 #[cfg(feature = "staking-xt")]
 pub mod staking;
@@ -94,7 +96,8 @@ macro_rules! compose_extrinsic_offline {
                 (),
                 (),
                 (),
-                [0u8; 32]
+                // ()
+                // [0u8; 32]
             ),
         );
 
@@ -133,7 +136,14 @@ macro_rules! compose_extrinsic_offline_account {
         use $crate::sp_runtime::traits::{BlakeTwo256, Hash};
         use $crate::sp_runtime::MultiSigner;
 
-        let extra = GenericExtra::new_account($era, $nonce, $account);
+        // the account is Pair type, passing Address type to new_signed2()
+        let operator_signer: MultiSigner = $account.public().into();
+        let account_id = operator_signer.into_account();
+        let account_addr = GenericAddress::from(account_id.clone());
+        let account_u8: [u8; 32] = account_id.into();
+
+        let extra = GenericExtra::new_account($era, $nonce, account_u8);
+        // let extra = GenericExtra::new($era, $nonce);
         let raw_payload = SignedPayload::from_raw(
             $call.clone(),
             extra.clone(),
@@ -145,7 +155,8 @@ macro_rules! compose_extrinsic_offline_account {
                 (),
                 (),
                 (),
-                $account
+                // ()
+                // $account
             ),
         );
 
@@ -157,11 +168,12 @@ macro_rules! compose_extrinsic_offline_account {
 
         let multi_signer: MultiSigner = $signer.public().into();
 
-        UncheckedExtrinsicV4::new_signed(
+        UncheckedExtrinsicV4::new_signed2(
             $call,
             GenericAddress::from(multi_signer.into_account()),
             signature.into(),
             extra,
+            account_addr,
         )
     }};
 }
@@ -205,6 +217,7 @@ macro_rules! compose_extrinsic {
                 UncheckedExtrinsicV4 {
                     signature: None,
                     function: call.clone(),
+                    operator: None,
                 }
             }
 		}
@@ -244,6 +257,7 @@ macro_rules! compose_extrinsic_account {
                 UncheckedExtrinsicV4 {
                     signature: None,
                     function: call.clone(),
+                    operator: None,
                 }
             }
 		}

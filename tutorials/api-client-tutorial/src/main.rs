@@ -29,7 +29,7 @@ struct Kitty {
 }
 
 fn main() {
-    let url = "ws://127.0.0.1:9990";
+    let url = "ws://127.0.0.1:19944";
 
     let signer = AccountKeyring::Alice.pair();
     let client = WsRpcClient::new(&url);

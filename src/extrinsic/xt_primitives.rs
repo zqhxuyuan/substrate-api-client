@@ -39,6 +39,7 @@ pub type GenericAddress = sp_runtime::MultiAddress<AccountId, ()>;
 /// therefore omitted here.
 #[cfg_attr(feature = "std", derive(Debug))]
 #[derive(Decode, Encode, Clone, Eq, PartialEq)]
+// pub struct GenericExtra(Era, Compact<u32>, Compact<u128>);
 pub struct GenericExtra(Era, Compact<u32>, Compact<u128>, [u8; 32]);
 
 impl GenericExtra {
@@ -58,7 +59,8 @@ impl Default for GenericExtra {
 
 /// additionalSigned fields of the respective SignedExtra fields.
 /// Order is the same as declared in the extra.
-pub type AdditionalSigned = (u32, u32, H256, H256, (), (), (), [u8; 32]);
+pub type AdditionalSigned = (u32, u32, H256, H256, (), (), ());
+// pub type AdditionalSigned = (u32, u32, H256, H256, (), (), (), ());
 
 #[derive(Encode, Clone)]
 pub struct SignedPayload<Call>((Call, GenericExtra, AdditionalSigned));
@@ -91,6 +93,7 @@ where
 pub struct UncheckedExtrinsicV4<Call> {
     pub signature: Option<(GenericAddress, MultiSignature, GenericExtra)>,
     pub function: Call,
+    pub operator: Option<GenericAddress>,
 }
 
 impl<Call> UncheckedExtrinsicV4<Call>
@@ -106,6 +109,21 @@ where
         UncheckedExtrinsicV4 {
             signature: Some((signed, signature, extra)),
             function,
+            operator: None,
+        }
+    }
+    
+    pub fn new_signed2(
+        function: Call,
+        signed: GenericAddress,
+        signature: MultiSignature,
+        extra: GenericExtra,
+        operator: GenericAddress
+    ) -> Self {
+        UncheckedExtrinsicV4 {
+            signature: Some((signed, signature, extra)),
+            function,
+            operator: Some(operator),
         }
     }
 
@@ -125,9 +143,10 @@ where
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "UncheckedExtrinsic({:?}, {:?})",
+            "UncheckedExtrinsic({:?}, {:?}), \noperator:{:?}",
             self.signature.as_ref().map(|x| (&x.0, &x.2)),
-            self.function
+            self.function,
+            self.operator
         )
     }
 }
@@ -140,16 +159,44 @@ where
 {
     fn encode(&self) -> Vec<u8> {
         encode_with_vec_prefix::<Self, _>(|v| {
+            // the first 4 bytes is version
+            // then if signed, the next is signature
             match self.signature.as_ref() {
                 Some(s) => {
                     v.push(V4 | 0b1000_0000);
-                    s.encode_to(v);
+                    // s.encode_to(v);
                 }
                 None => {
                     v.push(V4 & 0b0111_1111);
                 }
             }
+            match self.operator.as_ref() {
+                Some(s) => {
+                    v.push(V4 | 0b1000_0000);
+                }
+                None => {
+                    v.push(V4 & 0b0111_1111);
+                }
+            }
+            match self.signature.as_ref() {
+                Some(s) => {
+                    // v.push(V4 | 0b1000_0000);
+                    s.encode_to(v);
+                }
+                None => {
+                    // v.push(V4 & 0b0111_1111);
+                }
+            }
             self.function.encode_to(v);
+            match self.operator.as_ref() {
+                Some(s) => {
+                    // v.push(V4 | 0b1000_0000);
+                    s.encode_to(v);
+                }
+                None => {
+                    // v.push(V4 & 0b0111_1111);
+                }
+            }
         })
     }
 }
@@ -173,6 +220,9 @@ where
             return Err("Invalid transaction version".into());
         }
 
+        let is_operator = input.read_byte()?;
+        let is_operator = is_operator & 0b1000_0000 != 0;
+
         Ok(UncheckedExtrinsicV4 {
             signature: if is_signed {
                 Some(Decode::decode(input)?)
@@ -180,6 +230,11 @@ where
                 None
             },
             function: Decode::decode(input)?,
+            operator: if is_operator {
+                Some(Decode::decode(input)?)
+            } else {
+                None
+            },
         })
     }
 }
@@ -221,6 +276,21 @@ mod tests {
             MultiSignature::default(),
             GenericExtra::default(),
         );
+        println!("xt:{:?}", xt);
+        let xt_enc = xt.encode();
+        assert_eq!(xt, Decode::decode(&mut xt_enc.as_slice()).unwrap())
+    }
+
+    #[test]
+    fn encode_decode_roundtrip_works2() {
+        let xt = UncheckedExtrinsicV4::new_signed2(
+            vec![1, 1, 1],
+            GenericAddress::default(),
+            MultiSignature::default(),
+            GenericExtra::default(),
+            GenericAddress::default()
+        );
+        println!("xt:{:?}", xt);
 
         let xt_enc = xt.encode();
         assert_eq!(xt, Decode::decode(&mut xt_enc.as_slice()).unwrap())

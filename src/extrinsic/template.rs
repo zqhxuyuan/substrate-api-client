@@ -46,7 +46,17 @@ where
         )
     }
 
-    pub fn do_something1(&self, accountId: [u8; 32], amount: u32) -> TemplateXt1 {
+    // pub fn do_something1(&self, accountId: [u8; 32], amount: u32) -> TemplateXt1 {
+    //     compose_extrinsic_account!(
+    //         self,
+    //         Template,
+    //         DoSomething1,
+    //         accountId,
+    //         amount
+    //     )
+    // }
+
+    pub fn do_something1(&self, accountId: P, amount: u32) -> TemplateXt1 {
         compose_extrinsic_account!(
             self,
             Template,
