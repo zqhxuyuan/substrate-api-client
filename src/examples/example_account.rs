@@ -17,59 +17,53 @@
 use clap::{load_yaml, App};
 use keyring::AccountKeyring;
 use sp_core::crypto::Pair;
-use sp_runtime::MultiAddress;
+use sp_runtime::{MultiAddress, MultiSigner, AccountId32};
 
 use substrate_api_client::rpc::WsRpcClient;
-use substrate_api_client::{Api, XtStatus};
+use substrate_api_client::{Api, XtStatus, GenericAddress, AccountInfo};
+use sp_runtime::traits::IdentifyAccount;
 
 fn main() {
     env_logger::init();
     let url = get_node_url_from_cli();
     let client = WsRpcClient::new(&url);
 
-    // initialize api and set the signer (sender) that is used to sign the extrinsics
-    // let from = AccountKeyring::Alice.pair();
-    // let api = Api::new(client)
-    //     .map(|api| api.set_signer(from.clone()))
-    //     .unwrap();
+    // let A0: AccountId32 = [0; 32].into();
+    // let A1: AccountId32 = [1; 32].into();
+
     let mut api = Api::new(client).unwrap();
     let signer = AccountKeyring::Alice;
     api.signer = Some(signer.pair());
     println!("[+] Alice's Account Nonce is {}", api.get_nonce().unwrap());
 
-    // 2021-09-09 14:34:31 account: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY,
-    //   d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
-    // account:d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
     let origin = signer.to_account_id();
     println!("account:{:?}", origin);
 
-    // [+] Composed extrinsic: UncheckedExtrinsic(
-    //   Some(
-    //     (MultiAddress::Id(d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d),
-    //     GenericExtra(Era::Immortal, 2, 0)
-    //   )
-    // ),
-    // ([9, 0],  // module and function index
-    //    // parameters
-    //    MultiAddress::Id(d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)),
-    //    1000))
-    let xt = api.do_something(1);
-    // let xt = api.do_something0();
-    println!("[+] Composed extrinsic: {:?}\n", xt);
+    // account name: One: --: 5Fxune7f71ZbpP2FoY3mhYcmM596Erhv1gRue4nsPwkxMR4n 🔥
+    //   -> alice public key: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY 🔥 5GrwvaEF...
+    // account name: Two: --: 5CUjxa4wVKMj3FqKdqAUf7zcEMr4MYAjXeWmUf44B41neLmJ 🔥
+    //   -> bob   public key: 5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty 🔥
+    let alice: MultiSigner = AccountKeyring::Alice.pair().public().into();
+    let alice_u8: [u8; 32] = alice.into_account().into();
 
-    // send and watch extrinsic until finalized
-    let tx_hash = api
-        .send_extrinsic(xt.hex_encode(), XtStatus::InBlock)
-        .unwrap();
+    let bob: MultiSigner = AccountKeyring::Bob.pair().public().into();
+    let bob_u8: [u8; 32] = bob.into_account().into();
+
+    let one: MultiSigner = AccountKeyring::One.pair().public().into();
+    let one_u8: [u8; 32] = one.into_account().into();
+
+    let two: MultiSigner = AccountKeyring::Two.pair().public().into();
+    let two_u8: [u8; 32] = two.into_account().into();
+
+    let xt = api.create_account(one_u8, alice_u8, Some(alice_u8));
+    println!("[+] Composed extrinsic: {:?}\n", xt);
+    let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
     println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
 
-    // get StorageValue
-    let result: u32 = api
-        .get_storage_value("TemplateModule", "Something", None)
-        .unwrap()
-        .or(Some(99))
-        .unwrap();
-    println!("[+] some value is {:?}", result);
+    let xt = api.create_account(two_u8, bob_u8, Some(bob_u8));
+    println!("[+] Composed extrinsic: {:?}\n", xt);
+    let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
+    println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
 }
 
 pub fn get_node_url_from_cli() -> String {

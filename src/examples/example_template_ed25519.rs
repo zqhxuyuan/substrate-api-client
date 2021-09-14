@@ -45,7 +45,7 @@ fn main() {
     // let account_u8: [u8; 32] = account_id.into();
 
     // let xt = api.do_something(1);
-    // let xt = api.do_something1([1u8; 32], 100);
+    // let xt = api.do_something1([0u8; 32], 100);
     let xt = api.do_something1(bob_p, 100);
     // let xt = api.do_something0();
     println!("[+] Composed extrinsic: {:?}\n", xt);

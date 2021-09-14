@@ -24,47 +24,39 @@ use substrate_api_client::{Api, XtStatus};
 
 fn main() {
     env_logger::init();
+
+    alice();
+    bob();
+}
+
+fn alice() {
     let url = get_node_url_from_cli();
     let client = WsRpcClient::new(&url);
 
-    // initialize api and set the signer (sender) that is used to sign the extrinsics
-    // let from = AccountKeyring::Alice.pair();
-    // let api = Api::new(client)
-    //     .map(|api| api.set_signer(from.clone()))
-    //     .unwrap();
     let mut api = Api::new(client).unwrap();
     let signer = AccountKeyring::Alice;
     api.signer = Some(signer.pair());
     println!("[+] Alice's Account Nonce is {}", api.get_nonce().unwrap());
 
-    // 2021-09-09 14:34:31 account: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY,
-    //   d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
-    // account:d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d (5GrwvaEF...)
-    // let origin = signer.to_account_id();
-    // println!("account:{:?}", origin);
-
-    // let xt = api.do_something0();
-    // let xt = api.do_something(1);
-
-    let xt = api.do_something1(AccountKeyring::Alice.pair(), 100);
+    let xt = api.do_something1(AccountKeyring::One.pair(), 100);
     println!("[+] Composed extrinsic: {:?}\n", xt);
-
     let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
     println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
+}
 
-    // let xt = api.do_something1(AccountKeyring::Bob.pair(), 100);
-    // println!("[+] Composed extrinsic: {:?}\n", xt);
+fn bob() {
+    let url = get_node_url_from_cli();
+    let client = WsRpcClient::new(&url);
 
-    // let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
-    // println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
+    let mut api = Api::new(client).unwrap();
+    let signer = AccountKeyring::Bob;
+    api.signer = Some(signer.pair());
+    println!("[+] Bob's Account Nonce is {}", api.get_nonce().unwrap());
 
-    // get StorageValue
-    let result: u32 = api
-        .get_storage_value("TemplateModule", "Something", None)
-        .unwrap()
-        .or(Some(99))
-        .unwrap();
-    println!("[+] some value is {:?}", result);
+    let xt = api.do_something1(AccountKeyring::Two.pair(), 100);
+    println!("[+] Composed extrinsic: {:?}\n", xt);
+    let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
+    println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
 }
 
 pub fn get_node_url_from_cli() -> String {

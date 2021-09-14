@@ -107,8 +107,17 @@ fn main() {
     let alice = account.into_account();
     println!(" account:{:?}", alice);
 
-    println!("--------------------");
+    println!("--------------------2");
     generate_mock_account_name_address();
+
+    println!("--------------------1");
+    let one: MultiSigner = AccountKeyring::One.pair().public().into();
+    let account: AccountId32 = one.into_account();
+    println!("one:{}", account); // 5Fxune7f71ZbpP2FoY3mhYcmM596Erhv1gRue4nsPwkxMR4n
+
+    let two: MultiSigner = AccountKeyring::Two.pair().public().into();
+    let account: AccountId32 = two.into_account();
+    println!("one:{}", account); // 5CUjxa4wVKMj3FqKdqAUf7zcEMr4MYAjXeWmUf44B41neLmJ
 }
 
 // idx:0, 5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM
