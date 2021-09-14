@@ -93,7 +93,7 @@ where
 pub struct UncheckedExtrinsicV4<Call> {
     pub signature: Option<(GenericAddress, MultiSignature, GenericExtra)>,
     pub function: Call,
-    pub operator: Option<GenericAddress>,
+    // pub operator: Option<GenericAddress>,
 }
 
 impl<Call> UncheckedExtrinsicV4<Call>
@@ -109,23 +109,23 @@ where
         UncheckedExtrinsicV4 {
             signature: Some((signed, signature, extra)),
             function,
-            operator: None,
+            // operator: None,
         }
     }
     
-    pub fn new_signed2(
-        function: Call,
-        signed: GenericAddress,
-        signature: MultiSignature,
-        extra: GenericExtra,
-        operator: GenericAddress
-    ) -> Self {
-        UncheckedExtrinsicV4 {
-            signature: Some((signed, signature, extra)),
-            function,
-            operator: Some(operator),
-        }
-    }
+    // pub fn new_signed2(
+    //     function: Call,
+    //     signed: GenericAddress,
+    //     signature: MultiSignature,
+    //     extra: GenericExtra,
+    //     operator: GenericAddress
+    // ) -> Self {
+    //     UncheckedExtrinsicV4 {
+    //         signature: Some((signed, signature, extra)),
+    //         function,
+    //         operator: Some(operator),
+    //     }
+    // }
 
     #[cfg(feature = "std")]
     pub fn hex_encode(&self) -> String {
@@ -151,10 +151,10 @@ where
         };
         write!(
             f,
-            "UncheckedExtrinsic({:?}, {:?}), \noperator:{:?}, account:{}",
+            "UncheckedExtrinsic({:?}, {:?}), account:{}",
             self.signature.as_ref().map(|x| (&x.0, &x.2)),
             self.function,
-            self.operator,
+            // self.operator,
             hex_account
         )
     }
@@ -173,39 +173,39 @@ where
             match self.signature.as_ref() {
                 Some(s) => {
                     v.push(V4 | 0b1000_0000);
-                    // s.encode_to(v);
-                }
-                None => {
-                    v.push(V4 & 0b0111_1111);
-                }
-            }
-            match self.operator.as_ref() {
-                Some(s) => {
-                    v.push(V4 | 0b1000_0000);
-                }
-                None => {
-                    v.push(V4 & 0b0111_1111);
-                }
-            }
-            match self.signature.as_ref() {
-                Some(s) => {
-                    // v.push(V4 | 0b1000_0000);
                     s.encode_to(v);
                 }
                 None => {
-                    // v.push(V4 & 0b0111_1111);
+                    v.push(V4 & 0b0111_1111);
                 }
             }
+            // match self.operator.as_ref() {
+            //     Some(s) => {
+            //         v.push(V4 | 0b1000_0000);
+            //     }
+            //     None => {
+            //         v.push(V4 & 0b0111_1111);
+            //     }
+            // }
+            // match self.signature.as_ref() {
+            //     Some(s) => {
+            //         // v.push(V4 | 0b1000_0000);
+            //         s.encode_to(v);
+            //     }
+            //     None => {
+            //         // v.push(V4 & 0b0111_1111);
+            //     }
+            // }
             self.function.encode_to(v);
-            match self.operator.as_ref() {
-                Some(s) => {
-                    // v.push(V4 | 0b1000_0000);
-                    s.encode_to(v);
-                }
-                None => {
-                    // v.push(V4 & 0b0111_1111);
-                }
-            }
+            // match self.operator.as_ref() {
+            //     Some(s) => {
+            //         // v.push(V4 | 0b1000_0000);
+            //         s.encode_to(v);
+            //     }
+            //     None => {
+            //         // v.push(V4 & 0b0111_1111);
+            //     }
+            // }
         })
     }
 }
@@ -229,8 +229,8 @@ where
             return Err("Invalid transaction version".into());
         }
 
-        let is_operator = input.read_byte()?;
-        let is_operator = is_operator & 0b1000_0000 != 0;
+        // let is_operator = input.read_byte()?;
+        // let is_operator = is_operator & 0b1000_0000 != 0;
 
         Ok(UncheckedExtrinsicV4 {
             signature: if is_signed {
@@ -239,11 +239,11 @@ where
                 None
             },
             function: Decode::decode(input)?,
-            operator: if is_operator {
-                Some(Decode::decode(input)?)
-            } else {
-                None
-            },
+            // operator: if is_operator {
+            //     Some(Decode::decode(input)?)
+            // } else {
+            //     None
+            // },
         })
     }
 }
@@ -290,18 +290,18 @@ mod tests {
         assert_eq!(xt, Decode::decode(&mut xt_enc.as_slice()).unwrap())
     }
 
-    #[test]
-    fn encode_decode_roundtrip_works2() {
-        let xt = UncheckedExtrinsicV4::new_signed2(
-            vec![1, 1, 1],
-            GenericAddress::default(),
-            MultiSignature::default(),
-            GenericExtra::default(),
-            GenericAddress::default()
-        );
-        println!("xt:{:?}", xt);
+    // #[test]
+    // fn encode_decode_roundtrip_works2() {
+    //     let xt = UncheckedExtrinsicV4::new_signed2(
+    //         vec![1, 1, 1],
+    //         GenericAddress::default(),
+    //         MultiSignature::default(),
+    //         GenericExtra::default(),
+    //         GenericAddress::default()
+    //     );
+    //     println!("xt:{:?}", xt);
 
-        let xt_enc = xt.encode();
-        assert_eq!(xt, Decode::decode(&mut xt_enc.as_slice()).unwrap())
-    }
+    //     let xt_enc = xt.encode();
+    //     assert_eq!(xt, Decode::decode(&mut xt_enc.as_slice()).unwrap())
+    // }
 }

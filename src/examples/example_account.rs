@@ -55,15 +55,26 @@ fn main() {
     let two: MultiSigner = AccountKeyring::Two.pair().public().into();
     let two_u8: [u8; 32] = two.into_account().into();
 
+    // OwnerAccountIdMap:
+    //                  Alice_PK -> One_u8
+    // validate function of AccountExtension
+    //   who == signer == Alice AccountId
+    //   operator from [u8; 32] to AccountId == One_u8
+    //
     let xt = api.create_account(one_u8, alice_u8, Some(alice_u8));
     println!("[+] Composed extrinsic: {:?}\n", xt);
     let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
-    println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
+    println!("[+] #1 Transaction got included. Hash: {:?}\n", tx_hash);
 
-    let xt = api.create_account(two_u8, bob_u8, Some(bob_u8));
+    let xt = api.create_owner_account_permission(one_u8);
     println!("[+] Composed extrinsic: {:?}\n", xt);
     let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
-    println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
+    println!("[+] #2 Transaction got included. Hash: {:?}\n", tx_hash);
+
+    // let xt = api.create_account(two_u8, bob_u8, Some(bob_u8));
+    // println!("[+] Composed extrinsic: {:?}\n", xt);
+    // let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
+    // println!("[+] Transaction got included. Hash: {:?}\n", tx_hash);
 }
 
 pub fn get_node_url_from_cli() -> String {

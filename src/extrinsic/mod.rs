@@ -141,12 +141,13 @@ macro_rules! compose_extrinsic_offline_account {
         use $crate::sp_runtime::MultiSigner;
 
         // the account is Pair type, passing Address type to new_signed2()
-        let operator_signer: MultiSigner = $account.public().into();
-        let account_id = operator_signer.into_account();
-        let account_addr = GenericAddress::from(account_id.clone());
-        let account_u8: [u8; 32] = account_id.into();
+        // let operator_signer: MultiSigner = $account.public().into();
+        // let account_id = operator_signer.into_account();
+        // let account_addr = GenericAddress::from(account_id.clone());
+        // let account_u8: [u8; 32] = account_id.into();
 
-        let extra = GenericExtra::new_account($era, $nonce, account_u8);
+        // let extra = GenericExtra::new_account($era, $nonce, account_u8);
+        let extra = GenericExtra::new_account($era, $nonce, $account);
         // let extra = GenericExtra::new($era, $nonce);
         let raw_payload = SignedPayload::from_raw(
             $call.clone(),
@@ -172,12 +173,12 @@ macro_rules! compose_extrinsic_offline_account {
 
         let multi_signer: MultiSigner = $signer.public().into();
 
-        UncheckedExtrinsicV4::new_signed2(
+        UncheckedExtrinsicV4::new_signed(
             $call,
             GenericAddress::from(multi_signer.into_account()),
             signature.into(),
             extra,
-            account_addr,
+            // account_addr,
         )
     }};
 }
@@ -221,7 +222,7 @@ macro_rules! compose_extrinsic {
                 UncheckedExtrinsicV4 {
                     signature: None,
                     function: call.clone(),
-                    operator: None,
+                    // operator: None,
                 }
             }
 		}
@@ -261,7 +262,7 @@ macro_rules! compose_extrinsic_account {
                 UncheckedExtrinsicV4 {
                     signature: None,
                     function: call.clone(),
-                    operator: None,
+                    // operator: None,
                 }
             }
 		}

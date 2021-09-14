@@ -17,10 +17,11 @@
 use clap::{load_yaml, App};
 use keyring::AccountKeyring;
 use sp_core::crypto::Pair;
-use sp_runtime::MultiAddress;
+use sp_runtime::{MultiAddress, MultiSigner};
 
 use substrate_api_client::rpc::WsRpcClient;
 use substrate_api_client::{Api, XtStatus};
+use sp_runtime::traits::IdentifyAccount;
 
 fn main() {
     env_logger::init();
@@ -46,7 +47,12 @@ fn main() {
     // let xt = api.do_something0();
     // let xt = api.do_something(1);
 
-    let xt = api.do_something1(AccountKeyring::Alice.pair(), 100);
+    // let xt = api.do_something1(AccountKeyring::Alice.pair(), 100);
+    // let xt = api.do_something1([0u8; 32], 100);
+
+    let one: MultiSigner = AccountKeyring::One.pair().public().into();
+    let one_u8: [u8; 32] = one.into_account().into();
+    let xt = api.do_something1(one_u8, 100);
     println!("[+] Composed extrinsic: {:?}\n", xt);
 
     let tx_hash = api.send_extrinsic(xt.hex_encode(), XtStatus::InBlock).unwrap();
